@@ -1,0 +1,68 @@
+project:
+  name: "Profile Generator"
+  version: "0.3.0"
+  username: "DeepaprakashRajaram"
+  repository: "DeepaprakashRajaram"
+
+paths:
+  hero_asset: "assets/input/logo.png"
+  fonts_dir: "assets/input/fonts"
+  output:
+    ascii: "assets/generated/ascii"
+    svg: "assets/generated/svg"
+    stats: "assets/generated/stats"
+  preview: "preview"
+
+hero_renderer:
+  default_variant: "high-detail"
+  crop_bottom_percent: 25  # Crop out bottom 25% to remove text
+  background_color: "#FFFFFF" # Render background
+  variants:
+    high-detail:
+      cols: 120
+      ramp: " .`:-=+*cs#%@"
+      clahe_clip: 3.0
+      gamma: 1.5
+      bilateral_d: 5
+      bilateral_sigma: 25
+      
+    medium-detail:
+      cols: 90
+      ramp: " .`:-=+*cs#%@"
+      clahe_clip: 3.0
+      gamma: 1.7
+      bilateral_d: 9
+      bilateral_sigma: 75
+      
+    minimal-silhouette:
+      cols: 90
+      ramp: "  ##"
+      clahe_clip: 5.0
+      gamma: 2.5
+      bilateral_d: 15
+      bilateral_sigma: 150
+      
+    block-terminal:
+      cols: 80
+      ramp: " ░▒▓█"
+      clahe_clip: 2.0
+      gamma: 1.0
+      bilateral_d: 11
+      bilateral_sigma: 100
+
+animation:
+  profile: "article-default"
+  row_duration: 1.0
+  row_delay: 0.08
+  cursor:
+    enabled: true
+    color: "#000000"
+    width_scale: 1.0
+    height_scale: 1.0
+
+statistics:
+  enabled: true
+  colors:
+    background: "#FFFFFF"
+    text: "#000000"
+    accent: "#0366D6"
