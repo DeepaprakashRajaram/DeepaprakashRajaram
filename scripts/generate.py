@@ -37,13 +37,19 @@ def main():
     print("\n--- 3. Animation & Validation ---")
     for variant in config["hero_renderer"]["variants"]:
         preview_dir = os.path.join(config["paths"]["preview"], variant)
-        static_path = os.path.join(preview_dir, "10-hero-static.svg")
-        animated_path = os.path.join(preview_dir, "11-hero-animated.svg")
         
-        if os.path.exists(static_path):
-            print(f"Animating {variant}...")
-            if animation.animate_svg(static_path, animated_path, config, variant):
-                validate_svg.validate_svg(animated_path)
+        # Helper to process a variant file if it exists
+        def process_variant_svg(suffix):
+            static_p = os.path.join(preview_dir, f"10-hero-static{suffix}.svg")
+            animated_p = os.path.join(preview_dir, f"11-hero-animated{suffix}.svg")
+            if os.path.exists(static_p):
+                print(f"Animating {variant}{suffix}...")
+                if animation.animate_svg(static_p, animated_p, config, variant):
+                    validate_svg.validate_svg(animated_p)
+                    
+        process_variant_svg("-light")
+        process_variant_svg("-dark")
+        process_variant_svg("")
                 
     print("\n--- 4. Profile Assembly ---")
     import fetch_stats

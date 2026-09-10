@@ -14,10 +14,17 @@ paths:
   preview: "preview"
 
 hero_renderer:
-  default_variant: "high-detail"
+  default_variant: "dinosaur-identity"
   crop_bottom_percent: 25  # Crop out bottom 25% to remove text
   background_color: "#FFFFFF" # Render background
   variants:
+    dinosaur-identity:
+      cols: 100
+      ramp: " .`:-=+*cs#%@"
+      clahe_clip: 4.0
+      gamma: 1.8
+      bilateral_d: 7
+      bilateral_sigma: 50
     high-detail:
       cols: 120
       ramp: " .`:-=+*cs#%@"

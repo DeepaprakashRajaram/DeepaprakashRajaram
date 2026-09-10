@@ -60,11 +60,18 @@ def animate_svg(static_path, animated_path, config, variant_name):
     except:
         svg_w = 800.0
         
-    # Find all <text> elements
-    texts = g_elem.findall(f"{ns}text")
+    # Support for light/dark mode SVGs
+    # We will just apply the same logic to ALL <text> elements in the document sequentially
+    # This naturally handles layered SVGs because the layers are ordered sequentially in the DOM
     
-    # We need to collect the new elements to add them after the text elements,
-    # or wrap them. Actually, cursor should be drawn ON TOP of the text, so add to <g> after.
+    # We need the master <g> element that wraps everything
+    for child in root:
+        if child.tag.endswith('g'):
+            g_elem = child
+            break
+            
+    # Find all text elements regardless of which layer <g> they are in
+    texts = list(root.iter(f"{ns}text"))
     cursors = []
     
     for i, text_elem in enumerate(texts):
@@ -76,14 +83,16 @@ def animate_svg(static_path, animated_path, config, variant_name):
         clip_path = ET.SubElement(defs, f"{ns}clipPath", id=clip_id)
         rect = ET.SubElement(clip_path, f"{ns}rect", x="0", y=str(y_pos - 12), width="0", height="15")
         
+        # Determine if this is the eye layer for a special fade (eye is usually short and at the end)
+        parent = text_elem.find('..')
+        
         animate = ET.SubElement(rect, f"{ns}animate", 
                                 attributeName="width", 
-                                frm="0", # 'from' is a Python keyword, ET handles 'from' via kwarg unpacking or we just use set
                                 to=str(svg_w), 
                                 dur=f"{row_dur}s", 
                                 begin=f"{begin_time}s", 
                                 fill="freeze")
-        animate.set("from", "0") # workaround for reserved keyword
+        animate.set("from", "0") 
         
         # 2. Attach clipPath to text
         text_elem.set("clip-path", f"url(#{clip_id})")
@@ -113,10 +122,10 @@ def animate_svg(static_path, animated_path, config, variant_name):
             
             cursors.append(cursor)
             
-    # Append cursors to the end of <g> so they render on top
+    # Add cursors to the root SVG or master <g> so they render on top
     for c in cursors:
         g_elem.append(c)
-        
+    
     tree.write(animated_path, encoding="utf-8", xml_declaration=True)
     return True
 
@@ -124,6 +133,22 @@ if __name__ == "__main__":
     config = load_config()
     for variant in config["hero_renderer"]["variants"]:
         preview_dir = os.path.join(config["paths"]["preview"], variant)
+        
+        # Animate light variant
+        static_light = os.path.join(preview_dir, "10-hero-static-light.svg")
+        animated_light = os.path.join(preview_dir, "11-hero-animated-light.svg")
+        if os.path.exists(static_light):
+            print(f"Animating {variant} (Light)...")
+            animate_svg(static_light, animated_light, config, variant)
+            
+        # Animate dark variant
+        static_dark = os.path.join(preview_dir, "10-hero-static-dark.svg")
+        animated_dark = os.path.join(preview_dir, "11-hero-animated-dark.svg")
+        if os.path.exists(static_dark):
+            print(f"Animating {variant} (Dark)...")
+            animate_svg(static_dark, animated_dark, config, variant)
+            
+        # Also handle standard static if it still exists (for other variants)
         static_path = os.path.join(preview_dir, "10-hero-static.svg")
         animated_path = os.path.join(preview_dir, "11-hero-animated.svg")
         if os.path.exists(static_path):
